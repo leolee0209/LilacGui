@@ -3,3 +3,4 @@ build/
 CMakeLists.txt
 test/
 src/main.cpp
+lib/
