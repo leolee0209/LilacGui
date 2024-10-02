@@ -1,7 +1,7 @@
-#include "windowControl.hpp"
+#include "LWindow.hpp"
 #include <SDL2/SDL_image.h>
 
-int Gui::LWindow::create()
+bool Limb::LWindow::create()
 {
     // Screen dimension constants
     const int SCREEN_WIDTH = 640;
@@ -14,9 +14,9 @@ int Gui::LWindow::create()
 
     // Create window
     window = SDL_CreateWindow("ImageViewer",
-                                          SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                                          0, 0,
-                                          SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
+                              SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                              0, 0,
+                              SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
     if (!window)
     {
         // ERROR("Window could not be created! SDL_Error: " + string(SDL_GetError()));
@@ -37,7 +37,7 @@ int Gui::LWindow::create()
     int imgFlags = IMG_INIT_PNG | IMG_INIT_JPG;
     if (!(IMG_Init(imgFlags) & imgFlags))
     {
-        //ERROR("SDL_image could not initialize! SDL_image Error: " + string(IMG_GetError()));
+        // ERROR("SDL_image could not initialize! SDL_image Error: " + string(IMG_GetError()));
     }
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "2");
 
@@ -48,4 +48,19 @@ int Gui::LWindow::create()
     }
 
     return 0;
+}
+
+bool Limb::LWindow::close()
+{
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    TTF_Quit();
+    SDL_Quit();
+    IMG_Quit();
+    return true;
+}
+
+SDL_Renderer *Limb::LWindow::getRenderer()
+{
+    return renderer;
 }
