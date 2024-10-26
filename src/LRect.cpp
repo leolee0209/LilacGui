@@ -17,3 +17,9 @@ Point Limb::toAbsPoint(Point p, Point parent)
 {
     return {p.x + parent.x, p.y + parent.y};
 }
+bool Limb::withinRect(Point p, Rect r){
+    return  p.x >= r.x && 
+            p.y >= r.y && 
+            p.x <= r.x + r.w && 
+            p.y <= r.y + r.h;
+}

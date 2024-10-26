@@ -9,6 +9,8 @@ namespace Limb
     public:
         bool create();
         bool close();
+        void clear();
+        void present();
         SDL_Renderer *getRenderer();
 
     private:

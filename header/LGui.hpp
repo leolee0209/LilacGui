@@ -7,6 +7,8 @@
 #include <cstdint>
 #include <LWindow.hpp>
 
+#define INTERACTIVE 1
+#define NONINTERACTIVE 0
 namespace Limb
 {
     class LWindow;
@@ -14,13 +16,17 @@ namespace Limb
     class Tree
     {
     public:
-        virtual void draw(SDL_Renderer *renderer, Point parentP = zero);
+        virtual void draw(SDL_Renderer *renderer, Point parentP = zero){};
         void addSeed(Tree *);
         std::vector<Tree *> *getSeeds();
         void setSeeds(std::vector<Tree *>);
+        bool isInteractive();
+        Rect getRect();
+        void run();
         ~Tree();
 
     protected:
+        bool ifInteractive = NONINTERACTIVE;
         std::vector<Tree *> seeds;
     };
 
@@ -29,8 +35,12 @@ namespace Limb
     public:
         Root(LWindow* window);
         void draw(Point parentP = zero);
+        void updateInteractive();
+        std::vector<Tree *>* getInteractive();
+
     private:
         SDL_Renderer *renderer;
+        std::vector<Tree *> interactiveSeeds;
     };
 
     class Label : public Tree
@@ -40,6 +50,7 @@ namespace Limb
         Color color;
 
         Label(Rect rect, Color background);
+        Rect getRect();
         void draw(SDL_Renderer *renderer, Point parentP = zero);
     };
 
@@ -48,9 +59,13 @@ namespace Limb
     public:
         Rect range;
         void (*func)();
-
+        void run();
         Button(Rect range, void (*func)());
+        Rect getRect();
         void draw(SDL_Renderer *renderer, Point parentP = zero);
+
+    protected:
+        bool ifInteractive = INTERACTIVE;
     };
 
     class Text : public Tree
@@ -62,5 +77,7 @@ namespace Limb
         Color wordColor;
         Text(Rect rect, std::string text, Color wordColor, TTF_Font *font);
         void draw(SDL_Renderer *renderer, Point parentP = zero);
+        Rect getRect();
     };
+    void generateInteractive(Tree *tree, std::vector<Tree *> *ret);
 };

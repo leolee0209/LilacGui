@@ -2,13 +2,12 @@
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL.h>
 #include "LWindow.hpp"
-#include <cstdio>
 #include <LRect.hpp>
+#include <iostream>
+#include <LLog.hpp>
 
 using namespace Limb;
 using namespace std;
-
-
 
 Limb::Label::Label(Rect rect, Color background)
 {
@@ -31,6 +30,7 @@ void Root::draw(Point parentP)
     }
 }
 
+
 void Button::draw(SDL_Renderer *renderer, Point parentP)
 {
     vector<Tree *> *seeds = getSeeds();
@@ -42,15 +42,13 @@ void Button::draw(SDL_Renderer *renderer, Point parentP)
 
 void Label::draw(SDL_Renderer *renderer, Point parentP)
 {
-    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, 255);
+    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
 
-    SDL_Rect absR = toAbsSDLRect(rect,parentP);
-    if (!SDL_RenderFillRect(renderer, &absR))
+    SDL_Rect absR = toAbsSDLRect(rect, parentP);
+    if (SDL_RenderFillRect(renderer, &absR))
     {
-        // ERROR_L("Can't fill rect. " + std::string(SDL_GetError()));
+        ERROR("Can't fill rect. " + std::string(SDL_GetError()));
     }
-
-
     vector<Tree *> *seeds = getSeeds();
     Point absP = {absR.x, absR.y};
 
@@ -65,12 +63,38 @@ void Tree::addSeed(Tree *kid)
     if (kid)
         this->seeds.push_back(kid);
 }
-void Tree::setSeeds(std::vector<Tree *> newSeeds){
-    for (auto &t : seeds)
-    {
-        delete t;
-    }
+void Tree::setSeeds(std::vector<Tree *> newSeeds)
+{
     seeds = std::vector(newSeeds);
+}
+
+bool Limb::Tree::isInteractive()
+{
+    return this->ifInteractive;
+}
+
+Rect Limb::Tree::getRect()
+{
+    return {0,0,0,0};
+}
+void Limb::Tree::run()
+{
+}
+void Limb::Button::run()
+{
+    this->func();
+}
+Rect Limb::Label::getRect()
+{
+    return this->rect;
+}
+Rect Limb::Button::getRect()
+{
+    return this->range;
+}
+Rect Limb::Text::getRect()
+{
+    return this->rect;
 }
 
 vector<Tree *> *Tree::getSeeds()
@@ -78,16 +102,14 @@ vector<Tree *> *Tree::getSeeds()
     return &seeds;
 }
 
-Root::Root(LWindow* window){
+Root::Root(LWindow *window)
+{
     this->renderer = window->getRenderer();
 }
 
 Tree::~Tree()
 {
-    for (auto &t : seeds)
-    {
-        delete t;
-    }
+
 }
 
 Text::Text(Rect rect, std::string text, Color wordColor, TTF_Font *font)
@@ -99,7 +121,7 @@ Text::Text(Rect rect, std::string text, Color wordColor, TTF_Font *font)
 }
 void Text::draw(SDL_Renderer *renderer, Point parentP)
 {
-    SDL_SetRenderDrawColor(renderer, wordColor.r, wordColor.g, wordColor.b, 255);
+    SDL_SetRenderDrawColor(renderer, wordColor.r, wordColor.g, wordColor.b, wordColor.a);
     SDL_Rect absR = toAbsSDLRect(rect, parentP);
 
     SDL_Texture *t = SDL_CreateTextureFromSurface(renderer, TTF_RenderText_Shaded(font, text.c_str(), toSDLColor(wordColor), toSDLColor(transparent)));
@@ -111,5 +133,29 @@ void Text::draw(SDL_Renderer *renderer, Point parentP)
     for (const auto &t : *seeds)
     {
         t->draw(renderer, absP);
+    }
+}
+
+void Root::updateInteractive()
+{
+    interactiveSeeds.clear();
+    generateInteractive(this, &interactiveSeeds);
+}
+
+std::vector<Tree *>* Root::getInteractive()
+{
+    return &this->interactiveSeeds;
+}
+
+void Limb::generateInteractive(Tree *tree, vector<Tree *> *ret)
+{
+    auto seeds = tree->getSeeds();
+    for (const auto &s : *seeds)
+    {
+        if (s->isInteractive())
+        {
+            ret->push_back(s);
+        }
+        generateInteractive(s, ret);
     }
 }

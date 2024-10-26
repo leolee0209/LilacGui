@@ -27,4 +27,5 @@ namespace Limb{
     SDL_Color toSDLColor(const Color c);
     SDL_Rect toAbsSDLRect(Rect r, Point parent);
     Point toAbsPoint(Point p, Point parent);
+    bool withinRect(Point p, Rect r);
 }
